@@ -228,6 +228,9 @@
   .blink.u-on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger);}
   .track-count{font-size:12px;color:var(--gray-500);margin-top:8px;font-weight:600;}
   .track-filter{display:flex;gap:6px;margin:4px 0 12px;flex-wrap:wrap;}
+  .track-search{width:100%;box-sizing:border-box;margin:6px 0 12px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:14px;}
+  .track-search:focus{outline:none;border-color:var(--orange);}
+  @media(max-width:720px){ .track-search{font-size:16px;padding:11px 12px;} }
   .track-filter button{background:var(--gray-100);border:1px solid var(--line);border-radius:999px;font-size:11px;padding:4px 14px;cursor:pointer;color:var(--gray-700);font-weight:600;transition:.14s;}
   .track-filter button:hover{border-color:var(--orange);color:var(--orange);}
   .track-filter button.active{background:var(--orange);border-color:var(--orange);color:#fff;}
@@ -1930,6 +1933,7 @@ function fillSelectors(){
 
 /* ---------- inquiry building tracker ---------- */
 let trackFilter="all";
+let trackSearch="";
 function cnt(o){ return o?Object.values(o).filter(Boolean).length:0; }
 function renderInquiryBuildings(x){
   if(!x.regions||!x.regions.length) return "";
@@ -1938,6 +1942,7 @@ function renderInquiryBuildings(x){
   const suitN=cnt(x.suitable), unsuitN=cnt(x.unsuitable);
   let allTotal=0;
   let html=`<div class="suggest"><h4>楼盘询盘进度</h4>`;
+  html+=`<input id="trackSearchInput" class="track-search" type="search" inputmode="search" placeholder="搜索楼盘名 / 片区…" />`;
   html+=`<div class="track-filter">
     <button data-act="filter" data-f="all" class="${trackFilter==='all'?'active':''}">全部</button>
     <button data-act="filter" data-f="suitable" class="${trackFilter==='suitable'?'active':''}">合适 ${suitN}</button>
@@ -1958,7 +1963,7 @@ function renderInquiryBuildings(x){
       else if(trackFilter==="unsuitable") show=!!isUnsuit;
       else if(trackFilter==="none") show=!(isSuit||isUnsuit);
       if(!show) return;
-      groupHtml+=`<span class="b-track ${isSuit?'suitable':''} ${isUnsuit?'unsuitable':''}">
+      groupHtml+=`<span class="b-track ${isSuit?'suitable':''} ${isUnsuit?'unsuitable':''}" data-name="${esc(b.name)}" data-district="${esc(r)}" data-sub="${esc(b.sub||'')}">
         <span class="b-name">${esc(b.name)}</span>
         <button class="blink ${isSuit?'s-on':''}" data-act="suit" data-k="${esc(key)}">${isSuit?'合适✓':'合适'}</button>
         <button class="blink ${isUnsuit?'u-on':''}" data-act="unsuit" data-k="${esc(key)}">${isUnsuit?'不合适✓':'不合适'}</button>
@@ -1996,6 +2001,23 @@ function attachTrackHandlers(){
   });
   document.querySelectorAll('#d_body button[data-act="filter"]').forEach(btn=>btn.onclick=()=>{
     trackFilter=btn.dataset.f; rerenderTrack();
+  });
+  const si=document.getElementById("trackSearchInput");
+  if(si){ si.value=trackSearch; si.oninput=()=>{ trackSearch=si.value; applyTrackSearch(); }; }
+  applyTrackSearch();
+}
+function applyTrackSearch(){
+  const q=(trackSearch||"").trim().toLowerCase();
+  document.querySelectorAll('#d_body .b-track').forEach(el=>{
+    const name=(el.dataset.name||"").toLowerCase();
+    const dist=(el.dataset.district||"").toLowerCase();
+    const sub=(el.dataset.sub||"").toLowerCase();
+    const hit = !q || name.indexOf(q)>=0 || dist.indexOf(q)>=0 || sub.indexOf(q)>=0;
+    el.style.display = hit ? "" : "none";
+  });
+  document.querySelectorAll('#d_body .suggest-group').forEach(g=>{
+    const any=[...g.querySelectorAll('.b-track')].some(e=>e.style.display!=="none");
+    g.style.display = any ? "" : "none";
   });
 }
 let noteKey=null;
@@ -2067,6 +2089,7 @@ function deleteCurrent(){
 
 /* ---------- detail modal ---------- */
 function openDetail(id){
+  if(id!==detailId) trackSearch="";
   detailId=id; const x=data.find(d=>d.id===id); if(!x) return;
   document.getElementById("d_company").textContent=x.company;
   document.getElementById("d_tagline").textContent=
