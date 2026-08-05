@@ -413,9 +413,12 @@
   }
 
   /* 客户跟进：三大分组标题 + ABCDX 分类标签 */
-  .fo-band th.band{background:#eef2f7;color:#33415c;font-weight:700;text-align:center;border-bottom:2px solid #d7dee8;}
-  .fo-sec{margin:14px 0 4px;border:1px solid #e6e9ef;border-radius:10px;padding:12px 14px;background:#fafbfc;}
-  .fo-sec-h{font-weight:700;color:#e8843c;margin-bottom:10px;font-size:14px;padding-left:8px;border-left:3px solid #e8843c;}
+  .fo-band th.band{background:linear-gradient(180deg,#eaf0f7,#dbe5f0);color:#243b5e;font-weight:800;text-align:center;letter-spacing:2px;padding:11px 6px;border-top:4px solid #c2ccd9;border-bottom:3px solid #c2ccd9;border-left:2px solid #c2ccd9;box-shadow:inset 0 -1px 0 #fff;}
+  .fo-band th.band:first-of-type{border-left:none;}
+  .fo-sec{margin:16px 0 6px;border:1px solid #e6e9ef;border-left:4px solid #e8843c;border-radius:10px;padding:14px 16px;background:#fafbfc;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .fo-sec-h{font-weight:800;color:#e8843c;margin-bottom:12px;font-size:15px;padding-left:10px;border-left:4px solid #e8843c;letter-spacing:1px;}
+  .fo-cat-inline{font-size:12px;font-weight:700;padding:3px 6px;border:1px solid #ccd4e0;border-radius:6px;background:#fff;color:#243b5e;cursor:pointer;max-width:150px;width:100%;}
+  .fo-cat-inline:focus{outline:2px solid #e8843c;outline-offset:1px;}
   .data-table td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
   .chip.cat-a,.chip.cat-b,.chip.cat-c,.chip.cat-d,.chip.cat-x,.chip.cat-partner,.chip.cat-none,.chip.cat-deal{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;line-height:1.6;white-space:nowrap;}
   .chip.cat-a{background:#d8f3e0;color:#1b7a43;}
@@ -559,14 +562,14 @@
             <th></th>
             <th colspan="5" class="band">客户现状</th>
             <th colspan="4" class="band">客户搬迁目标</th>
-            <th colspan="7" class="band">业务推进</th>
+            <th colspan="3" class="band">业务推进</th>
             <th></th>
           </tr>
           <tr>
             <th style="width:34px"></th>
             <th>客户名称</th><th>分类</th><th>客户联络人</th><th>客户来源</th><th>主要跟进人</th>
             <th>最新沟通日期</th><th>需求面积</th><th>区域</th><th>沟通情况</th>
-            <th>已落实文件</th><th>开单情况</th><th>项目</th><th>业绩收入</th><th>款项回收</th><th>回收时间</th><th>2026年</th>
+            <th>已落实文件</th><th>开单情况</th><th>项目</th>
             <th></th>
           </tr>
         </thead>
@@ -809,15 +812,7 @@
         <div class="form-row"><label>已落实文件</label><input type="text" id="fo_doc" placeholder="如：租赁合同 / 意向书" /></div>
         <div class="form-row"><label>开单情况</label><input type="text" id="fo_deal" placeholder="如：已开单" /></div>
       </div>
-      <div class="grid2">
-        <div class="form-row"><label>项目</label><input type="text" id="fo_project" placeholder="如：安联大厦" /></div>
-        <div class="form-row"><label>业绩收入</label><input type="text" id="fo_income" placeholder="" /></div>
-      </div>
-      <div class="grid2">
-        <div class="form-row"><label>款项回收</label><input type="text" id="fo_recovered" placeholder="" /></div>
-        <div class="form-row"><label>回收时间</label><input type="text" id="fo_recoverTime" placeholder="如：2025.4" /></div>
-      </div>
-      <div class="form-row"><label>2026年</label><input type="text" id="fo_y2026" placeholder="2026年业绩" /></div>
+      <div class="form-row"><label>项目</label><input type="text" id="fo_project" placeholder="如：安联大厦" /></div>
     </div>
     <div class="row end">
       <button class="btn-ghost" id="fo_close">取消</button>
@@ -2485,10 +2480,6 @@ const IMP_DEFS={
     {k:"doc",label:"已落实文件",alias:["已落实文件","落实文件","文件"]},
     {k:"deal",label:"开单情况",alias:["开单情况","开单","成交情况"]},
     {k:"project",label:"项目",alias:["项目"]},
-    {k:"income",label:"业绩收入",alias:["业绩收入","收入","业绩"]},
-    {k:"recovered",label:"款项回收",alias:["款项回收","回收","回款"]},
-    {k:"recoverTime",label:"回收时间",alias:["回收时间","回收日期"]},
-    {k:"y2026",label:"2026年",alias:["2026年","26年"]},
     {k:"pinned",label:"重点跟进",alias:["重点跟进","置顶","重点"]}
   ]}
 };
@@ -2989,8 +2980,7 @@ function impDoImport(){
         source:String(r.source||"").trim(),owner:String(r.owner||"").trim(),lastDate:String(r.lastDate||"").trim(),
         area:String(r.area||"").trim(),district:String(r.district||"").trim(),comm:String(r.comm||"").trim(),
         doc:String(r.doc||"").trim(),deal:String(r.deal||"").trim(),project:String(r.project||"").trim(),
-        income:String(r.income||"").trim(),recovered:String(r.recovered||"").trim(),recoverTime:String(r.recoverTime||"").trim(),
-        y2026:String(r.y2026||"").trim(),pinned:String(r.pinned||"").trim()||"否"};
+        pinned:String(r.pinned||"").trim()||"否"};
       if(ex&&dm==="update"){ mergeIn(ex,p); updated++; }
       else{ p.id=uid(); followups.unshift(p); added++; }
     });
@@ -3356,8 +3346,8 @@ const FOLLOW_SEED_MARK="songguo_followups_v2_seeded";
 const FOLLOW_KEY="songguo_followups_v2";
 let followups=[]; let editingFoId=null;
 function normCat(v){ v=String(v||"").trim(); if(!v) return "未分类"; v=v.toUpperCase(); if(["A","B","C","D","X","合作方","未分类"].indexOf(v)>=0) return v; return "未分类"; }
-const FOLLOW_HEADERS=["客户名称","分类","客户联络人","客户来源","主要跟进人","最新沟通日期","需求面积","区域","最新沟通情况","已落实文件","开单情况","项目","业绩收入","款项回收","回收时间","2026年","重点跟进"];
-function followRows(){ return followups.map(c=>[c.company,c.category,c.contact,c.source,c.owner,c.lastDate,c.area,c.district,c.comm,c.doc,c.deal,c.project,c.income,c.recovered,c.recoverTime,c.y2026,c.pinned]); }
+const FOLLOW_HEADERS=["客户名称","分类","客户联络人","客户来源","主要跟进人","最新沟通日期","需求面积","区域","最新沟通情况","已落实文件","开单情况","项目","重点跟进"];
+function followRows(){ return followups.map(c=>[c.company,c.category,c.contact,c.source,c.owner,c.lastDate,c.area,c.district,c.comm,c.doc,c.deal,c.project,c.pinned]); }
 function loadFollowups(){
   try{ const r=localStorage.getItem(FOLLOW_KEY); if(r){ followups=JSON.parse(r); return; } }catch(e){}
   followups=[];
@@ -3397,16 +3387,17 @@ function renderFollowups(){
     `<div class="stat-card"><div class="stat-num">${aN}</div><div class="stat-label">A类已开单</div></div>`+
     `<div class="stat-card"><div class="stat-num">${progN}</div><div class="stat-label">推进中(A+B+C)</div></div>`;
   const tb=document.getElementById("foBody");
-  if(!total){ tb.innerHTML='<tr><td colspan="18" style="text-align:center;color:#888;padding:30px 0">暂无客户跟进记录，点右上角「+ 新增跟进」登记，或点「导入客户跟进」把 Excel 导进来</td></tr>'; return; }
+  if(!total){ tb.innerHTML='<tr><td colspan="14" style="text-align:center;color:#888;padding:30px 0">暂无客户跟进记录，点右上角「+ 新增跟进」登记，或点「导入客户跟进」把 Excel 导进来</td></tr>'; return; }
   const CATTXT={A:"已开单",B:"意向书",C:"已看楼",D:"未看楼",X:"暂时搁置",合作方:"重点合作",未分类:"未分类"};
   const CATCLS={A:"a",B:"b",C:"c",D:"d",X:"x",合作方:"partner",未分类:"none"};
+  const CATOPTS=[{v:"A",t:"A 已开单"},{v:"B",t:"B 意向书"},{v:"C",t:"C 已看楼"},{v:"D",t:"D 未看楼"},{v:"X",t:"X 暂时搁置"},{v:"合作方",t:"合作方（重点合作伙伴）"},{v:"未分类",t:"未分类"}];
   tb.innerHTML=list.map(c=>{
     const pin=(c.pinned==="是");
     const cat=c.category||"未分类";
     return `<tr>
       <td><button class="btn-ghost sm" title="${pin?'取消置顶':'置顶重点'}" onclick='togglePin("${c.id}")'>${pin?'★':'☆'}</button></td>
       <td><b>${esc(c.company)||"-"}</b></td>
-      <td><span class="chip cat-${CATCLS[cat]||"none"}" title="${CATTXT[cat]||""}">${esc(cat)}</span></td>
+      <td><select class="fo-cat-inline" onchange="setFoCat('${c.id}',this.value)">${CATOPTS.map(o=>`<option value="${o.v}"${o.v===cat?' selected':''}>${o.t}</option>`).join("")}</select></td>
       <td>${esc(c.contact)||"-"}</td>
       <td>${esc(c.source)||"-"}</td>
       <td>${esc(c.owner)||"-"}</td>
@@ -3417,15 +3408,19 @@ function renderFollowups(){
       <td>${esc(c.doc)||"-"}</td>
       <td>${c.deal?`<span class="chip cat-deal">${esc(c.deal)}</span>`:"-"}</td>
       <td>${esc(c.project)||"-"}</td>
-      <td class="num">${esc(c.income)||"-"}</td>
-      <td class="num">${esc(c.recovered)||"-"}</td>
-      <td>${esc(c.recoverTime)||"-"}</td>
-      <td class="num">${esc(c.y2026)||"-"}</td>
       <td><button class="btn-ghost sm" onclick='openFollowup("${c.id}")'>编辑</button></td>
     </tr>`;
   }).join("");
 }
 
+function setFoCat(id,v){
+  const c=followups.find(x=>x.id===id);
+  if(!c) return;
+  c.category=normCat(v);
+  c.updated=Date.now();
+  saveFollowups();
+  renderFollowups();
+}
 function openFollowup(id){
   editingFoId=id||null;
   const c=id?followups.find(x=>x.id===id):null;
@@ -3442,10 +3437,6 @@ function openFollowup(id){
   document.getElementById("fo_doc").value=c?c.doc:"";
   document.getElementById("fo_deal").value=c?c.deal:"";
   document.getElementById("fo_project").value=c?c.project:"";
-  document.getElementById("fo_income").value=c?c.income:"";
-  document.getElementById("fo_recovered").value=c?c.recovered:"";
-  document.getElementById("fo_recoverTime").value=c?c.recoverTime:"";
-  document.getElementById("fo_y2026").value=c?c.y2026:"";
   document.getElementById("fo_pinned").value=c?c.pinned:"否";
   document.getElementById("fo_delete").style.display=c?"inline-block":"none";
   document.getElementById("maskFollowup").classList.add("show");
@@ -3465,10 +3456,6 @@ function saveFollowup(){
     doc:document.getElementById("fo_doc").value.trim(),
     deal:document.getElementById("fo_deal").value.trim(),
     project:document.getElementById("fo_project").value.trim(),
-    income:document.getElementById("fo_income").value.trim(),
-    recovered:document.getElementById("fo_recovered").value.trim(),
-    recoverTime:document.getElementById("fo_recoverTime").value.trim(),
-    y2026:document.getElementById("fo_y2026").value.trim(),
     pinned:document.getElementById("fo_pinned").value,
     updated:Date.now()
   };
@@ -3561,11 +3548,7 @@ const PIVOT_BOARDS={
       {k:"owner",label:"主要跟进人"},
       {k:"source",label:"客户来源"}
     ],
-    measures:[
-      {k:"income",label:"业绩收入"},
-      {k:"recovered",label:"款项回收"},
-      {k:"y2026",label:"2026年业绩"}
-    ],
+    measures:[],
     kpi:r=>({num:r.length,sub:r.filter(c=>c.pinned==="是").length+" 条重点跟进"})}
 };
 function fmtNum(v){ if(v==null||isNaN(v)) return "-"; return (Math.round(v*100)/100).toLocaleString("zh-CN"); }
