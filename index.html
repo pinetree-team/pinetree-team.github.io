@@ -129,6 +129,10 @@
   td .pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;background:var(--gray-100);color:var(--gray-700);white-space:nowrap;font-weight:600;}
   td .pill.deal{background:var(--orange-soft);color:var(--orange);}
   td .pill.lost{background:#EAEAEE;color:var(--gray-500);}
+  /* 长文本列（客户管理-备注）：给足宽度、自动换行、超长折叠 3 行 + 悬停看全文 */
+  .col-remark{min-width:200px;max-width:300px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;color:var(--gray-700);line-height:1.5;}
+  .col-remark.clamp{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;}
+  th.col-remark{white-space:nowrap;color:var(--gray-700);}
   .due-cell.over{color:var(--danger);font-weight:700;}
   .due-cell.soon{color:var(--warn);font-weight:700;}
 
@@ -462,7 +466,7 @@
     <div class="table-wrap" id="custTableWrap">
       <table class="data-table" id="custTable">
         <thead><tr>
-          <th>拜访人</th><th>拜访日期</th><th>客户公司</th><th>联系人</th><th>楼宇</th><th>面积(㎡)</th><th>租金/月</th><th>管理费/月</th><th>到期</th><th>痛点</th><th>搬迁计划</th><th>转介</th><th>目标地段</th><th>需求面积</th><th>预算</th><th>备注</th><th></th>
+          <th>拜访人</th><th>拜访日期</th><th>客户公司</th><th>联系人</th><th>楼宇</th><th>面积(㎡)</th><th>租金/月</th><th>管理费/月</th><th>到期</th><th>痛点</th><th>搬迁计划</th><th>转介</th><th>目标地段</th><th>需求面积</th><th>预算</th><th class="col-remark">备注</th><th></th>
         </tr></thead>
         <tbody id="custBody"></tbody>
       </table>
@@ -2928,7 +2932,7 @@ function renderCustomers(){
     <td>${esc(c.targetArea)||"-"}</td>
     <td>${esc(c.needArea)||"-"}</td>
     <td>${esc(c.budget)||"-"}</td>
-    <td>${esc(c.remark)||"-"}</td>
+    <td class="col-remark${ (c.remark&&String(c.remark).length>40)?' clamp':'' }" title="${esc(c.remark||"")}">${esc(c.remark)||"-"}</td>
     <td><button class="btn-ghost sm" onclick='openCustomer("${c.id}")'>编辑</button></td>
   </tr>`).join("");
 }
