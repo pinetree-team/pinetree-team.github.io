@@ -136,6 +136,8 @@
   /* Modal */
   .mask{position:fixed;inset:0;background:rgba(20,20,25,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow:auto;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);}
   .mask.show{display:flex;animation:fade .2s ease;}
+  /* 粘贴微信笔记窗口：从客户/询盘详情里打开，需盖在父弹窗之上 */
+  #maskNote{z-index:60;}
   .modal{background:#fff;border-radius:18px;box-shadow:var(--shadow-lg);width:100%;max-width:640px;padding:24px 24px 22px;margin:auto;animation:pop .22s cubic-bezier(.2,.8,.3,1);}
   @keyframes fade{from{opacity:0}to{opacity:1}}
   @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
