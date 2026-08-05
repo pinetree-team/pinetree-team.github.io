@@ -227,6 +227,7 @@
   .blink.s-on{background:var(--ok-soft);border-color:var(--ok);color:var(--ok);}
   .blink.u-on{background:var(--danger-soft);border-color:var(--danger);color:var(--danger);}
   .track-count{font-size:12px;color:var(--gray-500);margin-top:8px;font-weight:600;}
+  .track-hint{font-size:12px;color:var(--gray-500);margin:6px 0 10px;line-height:1.6;}
   .track-filter{display:flex;gap:6px;margin:4px 0 12px;flex-wrap:wrap;}
   .track-search{width:100%;box-sizing:border-box;margin:6px 0 12px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:14px;}
   .track-search:focus{outline:none;border-color:var(--orange);}
@@ -234,6 +235,11 @@
   .track-filter button{background:var(--gray-100);border:1px solid var(--line);border-radius:999px;font-size:11px;padding:4px 14px;cursor:pointer;color:var(--gray-700);font-weight:600;transition:.14s;}
   .track-filter button:hover{border-color:var(--orange);color:var(--orange);}
   .track-filter button.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .track-top{margin:4px 0 8px;}
+  .b-dist{font-size:11px;color:var(--gray-500);background:var(--gray-100);border-radius:6px;padding:1px 7px;margin-left:2px;}
+  .blink.del{padding:3px 8px;color:var(--gray-500);}
+  .blink.del:hover{border-color:var(--danger);color:var(--danger);}
+  .b-track.manual{background:#fff7ed;}
   .note-text{width:100%;font-family:inherit;font-size:13px;padding:11px;border:1px solid var(--line);border-radius:var(--radius-sm);resize:vertical;box-sizing:border-box;transition:.16s;}
   .note-text:focus{outline:none;border-color:var(--orange);box-shadow:var(--ring);}
 
@@ -869,6 +875,23 @@
     <div class="modal-foot">
       <button class="btn-ghost" id="note_close">关闭</button>
       <button class="btn-primary" id="note_save">保存笔记</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Property Source Modal -->
+<div class="mask" id="maskAddSource">
+  <div class="modal">
+    <h2>添加盘源</h2>
+    <div class="tagline">手动登记你问过的合适盘源，无需先选片区</div>
+    <div class="grid2">
+      <div class="form-row"><label>楼盘名称 *</label><input type="text" id="src_name" placeholder="如：环球都会广场" /></div>
+      <div class="form-row"><label>所属片区</label><select id="src_district"></select></div>
+    </div>
+    <div class="form-row full"><label>盘源信息（租金 / 面积 / 免租 / 装修 / 朝向…）</label><textarea id="src_note" rows="3" placeholder="例如：租金 155 含票，110㎡，朝南，免租 2 个月，可谈…"></textarea></div>
+    <div class="modal-foot">
+      <button class="btn-ghost" id="src_close">取消</button>
+      <button class="btn-primary" id="src_save">添加</button>
     </div>
   </div>
 </div>
@@ -1994,12 +2017,12 @@ let trackFilter="all";
 let trackSearch="";
 function cnt(o){ return o?Object.values(o).filter(Boolean).length:0; }
 function renderInquiryBuildings(x){
-  if(!x.regions||!x.regions.length) return "";
   // 兼容旧数据：把单选 picked 迁移为 suitable
   if(x.picked!==undefined){ x.suitable=x.suitable||{}; if(x.picked) x.suitable[x.picked]=true; delete x.picked; save(); }
   const suitN=cnt(x.suitable), unsuitN=cnt(x.unsuitable);
-  let allTotal=0;
+  const shownKeys=new Set();
   let html=`<div class="suggest"><h4>楼盘询盘进度</h4>`;
+  html+=`<div class="track-top"><button class="btn-primary btn-sm" id="btnAddSource">+ 添加盘源</button></div>`;
   html+=`<input id="trackSearchInput" class="track-search" type="search" inputmode="search" placeholder="搜索楼盘名 / 片区…" />`;
   html+=`<div class="track-filter">
     <button data-act="filter" data-f="all" class="${trackFilter==='all'?'active':''}">全部</button>
@@ -2007,7 +2030,8 @@ function renderInquiryBuildings(x){
     <button data-act="filter" data-f="unsuitable" class="${trackFilter==='unsuitable'?'active':''}">不合适 ${unsuitN}</button>
     <button data-act="filter" data-f="none" class="${trackFilter==='none'?'active':''}">待定</button>
   </div>`;
-  x.regions.forEach(r=>{
+  let allTotal=0;
+  (x.regions||[]).forEach(r=>{
     const list=mergedBuildings(r);
     if(!list.length) return;
     let groupHtml=""; let regionShown=0;
@@ -2015,7 +2039,7 @@ function renderInquiryBuildings(x){
       const key=r+"|"+b.name;
       const isSuit=x.suitable&&x.suitable[key];
       const isUnsuit=x.unsuitable&&x.unsuitable[key];
-      allTotal++;
+      allTotal++; shownKeys.add(key);
       let show=true;
       if(trackFilter==="suitable") show=!!isSuit;
       else if(trackFilter==="unsuitable") show=!!isUnsuit;
@@ -2031,7 +2055,35 @@ function renderInquiryBuildings(x){
     });
     if(regionShown>0) html+=`<div class="suggest-group"><h5>${esc(r)} · ${regionShown} 个</h5><div class="b-list">${groupHtml}</div></div>`;
   });
+  // 手动添加盘源（无需先选片区）
+  const srcList=(x.sources||[]).filter(s=>s&&s.name);
+  if(srcList.length){
+    let g="";
+    srcList.forEach(s=>{
+      const district=(s.district||"其他");
+      const key=district+"|"+s.name;
+      const isSuit=x.suitable&&x.suitable[key];
+      const isUnsuit=x.unsuitable&&x.unsuitable[key];
+      if(!shownKeys.has(key)){ allTotal++; shownKeys.add(key); }
+      let show=true;
+      if(trackFilter==="suitable") show=!!isSuit;
+      else if(trackFilter==="unsuitable") show=!!isUnsuit;
+      else if(trackFilter==="none") show=!(isSuit||isUnsuit);
+      if(!show) return;
+      g+=`<span class="b-track manual ${isSuit?'suitable':''} ${isUnsuit?'unsuitable':''}" data-name="${esc(s.name)}" data-district="${esc(district)}" data-sub="">
+        <span class="b-name">${esc(s.name)}</span><span class="b-dist">${esc(district)}</span>
+        <button class="blink ${isSuit?'s-on':''}" data-act="suit" data-k="${esc(key)}">${isSuit?'合适✓':'合适'}</button>
+        <button class="blink ${isUnsuit?'u-on':''}" data-act="unsuit" data-k="${esc(key)}">${isUnsuit?'不合适✓':'不合适'}</button>
+        <button class="blink" data-act="note" data-k="${esc(key)}">${(x.bnotes&&x.bnotes[key])?'笔记✓':'笔记'}</button>
+        <button class="blink del" data-act="delsrc" data-k="${esc(key)}" title="移除该盘源">✕</button>
+      </span>`;
+    });
+    if(g) html+=`<div class="suggest-group"><h5>手动添加盘源 · ${srcList.length} 个</h5><div class="b-list">${g}</div></div>`;
+  }
   const pendN=Math.max(0, allTotal-suitN-unsuitN);
+  if(allTotal===0){
+    html+=`<div class="track-hint">还没有楼盘。先选「片区偏好」，或直接点上方「+ 添加盘源」登记你问过的合适盘源。</div>`;
+  }
   html+=`<div class="track-count">合适 ${suitN} · 不合适 ${unsuitN} · 待定 ${pendN} · 共 ${allTotal} 个楼盘</div></div>`;
   return html;
 }
@@ -2059,6 +2111,17 @@ function attachTrackHandlers(){
   });
   document.querySelectorAll('#d_body button[data-act="filter"]').forEach(btn=>btn.onclick=()=>{
     trackFilter=btn.dataset.f; rerenderTrack();
+  });
+  const ba=document.getElementById("btnAddSource");
+  if(ba) ba.onclick=openAddSource;
+  document.querySelectorAll('#d_body button[data-act="delsrc"]').forEach(btn=>btn.onclick=()=>{
+    const x=data.find(d=>d.id===detailId); if(!x||!x.sources) return;
+    const k=btn.dataset.k;
+    x.sources=x.sources.filter(s=>(s.district||"其他")+"|"+s.name!==k);
+    if(x.suitable) delete x.suitable[k];
+    if(x.unsuitable) delete x.unsuitable[k];
+    if(x.bnotes) delete x.bnotes[k];
+    save(); rerenderTrack();
   });
   const si=document.getElementById("trackSearchInput");
   if(si){ si.value=trackSearch; si.oninput=()=>{ trackSearch=si.value; applyTrackSearch(); }; }
@@ -2096,6 +2159,36 @@ function saveNote(){
   document.getElementById("maskNote").classList.remove("show"); noteKey=null;
 }
 function closeNote(){ document.getElementById("maskNote").classList.remove("show"); noteKey=null; }
+
+/* ---------- add property source (independent of region) ---------- */
+function fillSrcDistrict(){
+  const sel=document.getElementById("src_district");
+  sel.innerHTML="";
+  IMP_REGIONS.forEach(r=>{ const o=document.createElement("option"); o.value=r; o.textContent=r; sel.appendChild(o); });
+  sel.value="其他";
+}
+function openAddSource(){
+  const x=data.find(d=>d.id===detailId); if(!x) return;
+  fillSrcDistrict();
+  document.getElementById("src_name").value="";
+  document.getElementById("src_note").value="";
+  document.getElementById("maskAddSource").classList.add("show");
+  setTimeout(()=>document.getElementById("src_name").focus(),50);
+}
+function saveAddSource(){
+  const x=data.find(d=>d.id===detailId); if(!x) return;
+  const name=document.getElementById("src_name").value.trim();
+  if(!name){ alert("请填写楼盘名称"); return; }
+  const district=document.getElementById("src_district").value.trim()||"其他";
+  const note=document.getElementById("src_note").value.trim();
+  x.sources=x.sources||[];
+  const key=district+"|"+name;
+  if(x.sources.some(s=>(s.district||"其他")+"|"+s.name===key)){ alert("该盘源已添加"); closeAddSource(); rerenderTrack(); return; }
+  x.sources.push({name, district});
+  if(note){ x.bnotes=x.bnotes||{}; x.bnotes[key]=note; }
+  save(); closeAddSource(); rerenderTrack();
+}
+function closeAddSource(){ document.getElementById("maskAddSource").classList.remove("show"); }
 
 /* ---------- form modal ---------- */
 function openForm(id){
@@ -2988,6 +3081,8 @@ document.getElementById("ab_close").onclick=closeAddBuilding;
 document.getElementById("maskAddBuilding").onclick=e=>{ if(e.target.id==="maskAddBuilding") closeAddBuilding(); };
 document.getElementById("note_save").onclick=saveNote;
 document.getElementById("note_close").onclick=closeNote;
+document.getElementById("src_save").onclick=saveAddSource;
+document.getElementById("src_close").onclick=closeAddSource;
 document.getElementById("maskNote").onclick=e=>{ if(e.target.id==="maskNote") closeNote(); };
 document.getElementById("maskForm").onclick=e=>{ if(e.target.id==="maskForm") closeForm(); };
 document.getElementById("maskDetail").onclick=e=>{ if(e.target.id==="maskDetail") closeDetail(); };
