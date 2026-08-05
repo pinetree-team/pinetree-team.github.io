@@ -302,6 +302,57 @@
     .imp-map{grid-template-columns:1fr 1fr;}
     .imp-prev{max-height:260px;}
   }
+
+  /* ===== 移动端增强：把手机体验打磨到顺手 ===== */
+  @media (max-width:720px){
+    /* 1) 表单控件 16px，避免 iOS 点输入框时整页突然放大（最影响手感的小细节） */
+    select,input[type=text],input[type=number],input[type=date],textarea,
+    .note-text,.imp-ta,input.search{ font-size:16px; padding:11px 12px; }
+    /* 去掉按钮/可点元素的 300ms 延迟与双击缩放，点哪响哪 */
+    button,select,input,textarea,.blink,.b-track,.card,a.btn-ghost{ touch-action:manipulation; }
+
+    /* 2) 顶部操作按钮改成单行横向滑动，不再占好几行高度 */
+    .actions{ order:2; width:100%; flex:1 1 100%; flex-wrap:nowrap; overflow-x:auto;
+      justify-content:flex-start; gap:8px; padding-bottom:2px; scrollbar-width:none; }
+    .actions::-webkit-scrollbar{ display:none; }
+    .actions button,.actions a.btn-ghost{ white-space:nowrap; flex:0 0 auto; }
+
+    /* 3) 数据表格首列吸住：横向滑动时永远看得到「公司/楼盘名」 */
+    #list{ overflow-x:auto; overflow-y:hidden; border-radius:var(--radius); -webkit-overflow-scrolling:touch; }
+    table{ overflow:visible; border-radius:0; min-width:640px; }
+    td:first-child,th:first-child{ position:sticky; left:0; }
+    td:first-child{ background:#fff; z-index:1; }
+    th:first-child{ background:var(--gray-100); z-index:3; }
+    tbody tr:hover td:first-child{ background:var(--orange-soft); }
+
+    /* 4) 小按钮再大一点，手指更好点 */
+    .blink{ padding:7px 12px; font-size:12px; }
+    .b-track{ padding:7px 11px; font-size:13px; }
+    .toolbar .seg button{ padding:9px 14px; }
+
+    /* 5) 看板列稍窄，减少横滑距离 */
+    .board{ grid-template-columns:repeat(7,minmax(150px,1fr)); }
+
+    /* 6) 刘海屏/底部条安全区，内容不顶到边 */
+    header.top{ padding-top:calc(12px + env(safe-area-inset-top));
+      padding-left:calc(16px + env(safe-area-inset-left));
+      padding-right:calc(16px + env(safe-area-inset-right)); }
+    .mask{ padding-bottom:calc(24px + env(safe-area-inset-bottom)); }
+  }
+
+  /* 小屏手机：弹窗全屏化，像原生页面一样好用 */
+  @media (max-width:480px){
+    .mask{ padding:0; }
+    .modal{ max-width:none; border-radius:0; min-height:100vh; min-height:100dvh;
+      padding:18px 16px calc(18px + env(safe-area-inset-bottom)); }
+    .modal-foot{ position:sticky; bottom:0; background:#fff;
+      margin:18px -16px calc(-18px - env(safe-area-inset-bottom));
+      padding:14px 16px calc(14px + env(safe-area-inset-bottom)); gap:12px;
+      border-top:1px solid var(--line); box-shadow:0 -2px 12px rgba(20,20,30,.06); }
+    .modal-foot .btn-primary,.modal-foot .btn-ghost{ flex:1; }
+    .stat{ padding:13px 14px; }
+    .stat .num{ font-size:20px; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>if(!(window.supabase&&window.supabase.createClient)){document.write('<scr'+'ipt src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"><\/scr'+'ipt>');}</script>
