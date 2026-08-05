@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-<title>选址顾问工作台 · 团队上手说明</title>
+<title>选址顾问工作台 · 使用说明</title>
 <meta name="theme-color" content="#E8541D" />
 <style>
 :root{
@@ -72,6 +72,7 @@ h2 .num{
 }
 .card + .card{margin-top:12px}
 .card h3{font-size:14px;font-weight:700;margin-bottom:10px;color:var(--ink)}
+.card h3 .k{color:var(--orange-d)}
 
 ol,ul{padding-left:20px}
 ol li,ul li{margin-bottom:7px;font-size:14.5px;color:var(--ink-2)}
@@ -115,6 +116,11 @@ td:first-child{white-space:nowrap;font-weight:600;color:var(--ink)}
 .steps li strong{color:var(--ink)}
 
 .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mod{border:1px solid var(--line);border-radius:12px;padding:14px 15px;background:#fff}
+.mod h4{font-size:14.5px;margin-bottom:8px;color:var(--orange-d);display:flex;align-items:center;gap:7px}
+.mod h4 .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);flex:none}
+.mod p{font-size:13.5px;color:var(--ink-2);margin:0}
+.mod code{background:var(--orange-soft);color:var(--orange-d);border-radius:5px;padding:1px 6px;font-size:12.5px}
 @media(max-width:640px){
   .two{grid-template-columns:1fr}
   .hero h1{font-size:22px}
@@ -132,19 +138,22 @@ footer{
 <div class="hero">
   <div class="wrap">
     <span class="tag">松果运营 · 内部工具</span>
-    <h1>选址顾问工作台<br/>团队上手说明</h1>
-    <p>询盘管理 · 成交台账 · 客户管理 · 楼盘库 · 分布图 —— 打开网页即用，无需安装、无需注册</p>
+    <h1>选址顾问工作台<br/>使用说明</h1>
+    <p>询盘 · 成交 · 客户 · 楼盘 · 数据透视 —— 打开网页即用，无需安装、无需注册</p>
   </div>
 </div>
 
 <div class="wrap">
 
   <div class="urlcard">
-    <div class="lbl">工作台网址（永久有效，电脑手机都能打开）</div>
-    <div class="url">https://leona0830zzz-alt.github.io/</div>
+    <div class="lbl">工作台网址（永久有效，电脑 / 手机 / 微信里都能打开）</div>
+    <div class="url">https://pinetree-team.github.io/</div>
     <div class="btnrow">
-      <a class="btn btn-primary" href="https://leona0830zzz-alt.github.io/" target="_blank" rel="noopener">立即打开工作台</a>
+      <a class="btn btn-primary" href="https://pinetree-team.github.io/" target="_blank" rel="noopener">立即打开工作台</a>
       <button class="btn btn-ghost" id="copyBtn">复制网址</button>
+    </div>
+    <div class="note" style="margin-top:14px">
+      <strong>微信里怎么打开：</strong>直接点这个链接即可。万一打不开，点右上角「…」→ 选「在浏览器打开」就能正常加载。
     </div>
   </div>
 
@@ -153,12 +162,13 @@ footer{
     <h2><span class="num">1</span>工作台里有什么</h2>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>板块</th><th>用途</th></tr></thead>
+        <thead><tr><th>板块</th><th>用来干什么</th></tr></thead>
         <tbody>
-          <tr><td>询盘管理</td><td>记录每一条客户询盘：需求面积、预算、行业、跟进阶段、下次跟进时间；可为每个客户勾选「合适 / 不合适」的楼盘并写跟进笔记</td></tr>
-          <tr><td>成交台账</td><td>已成交案例库：企业、项目、商务区、面积、租金、行业、楼层，可随时新增和编辑，用来做租金参考</td></tr>
-          <tr><td>楼盘库</td><td>各片区盘源明细：租金参考/底价、免租期、管理费、楼宇等级、装修状况、在租面积段、空调、停车、地铁等；支持新增楼盘、调整所属片区、自定义新片区</td></tr>
-          <tr><td>客户管理</td><td>客户拜访登记：拜访人/日期、客户公司、联系人、楼宇、面积、租金、管理费、到期时间、使用痛点、短期搬迁计划、转介机会、目标地段、需求面积、预算、备注；可自主新增/编辑/删除，也能批量导入</td></tr>
+          <tr><td>询盘管理</td><td>记录每条客户询盘：需求面积、预算、行业、跟进阶段、下次跟进时间；可给每个楼盘标「已问 / 合适 / 不合适」，并贴微信里的跟进笔记</td></tr>
+          <tr><td>成交台账</td><td>已成交案例库：企业、项目、商务区、面积、租金、行业、楼层、类型，随时新增编辑，做租金参考</td></tr>
+          <tr><td>楼盘库</td><td>各片区盘源明细：租金参考/底价、免租期、管理费、楼宇等级、装修、在租面积段、空调、停车、地铁等；支持新增楼盘、自定义新片区</td></tr>
+          <tr><td>客户管理</td><td>客户拜访登记（16 字段）：拜访人/日期、公司、联系人、楼宇、面积、租金、管理费、到期、痛点、搬迁计划、转介机会、目标地段、需求面积、预算、备注；可新增/编辑/删除，也能批量导入</td></tr>
+          <tr><td>数据透视</td><td>各板块数据统计：总览看关键指标；自定义透视按「维度 × 指标」交叉统计，自动出表格和条形图</td></tr>
           <tr><td>地图</td><td>写字楼分布图，按片区查看楼宇位置</td></tr>
         </tbody>
       </table>
@@ -167,10 +177,129 @@ footer{
 
   <!-- 2 -->
   <section>
-    <h2><span class="num">2</span>把它装成手机 App</h2>
+    <h2><span class="num">2</span>怎么录入和修改数据</h2>
+    <div class="two">
+      <div class="mod">
+        <h4><span class="dot"></span>询盘管理</h4>
+        <p>点 <code>+ 新增询盘</code> 填写客户信息；点列表里任一条可<strong>查看 / 编辑 / 删除</strong>。详情里每个楼盘有「已问 / 合适 / 不合适」标记，点「笔记」可贴微信里的跟进文字。</p>
+      </div>
+      <div class="mod">
+        <h4><span class="dot"></span>楼盘库</h4>
+        <p>点 <code>+ 新增楼盘</code> 填租金、免租期、管理费、等级等；支持「新增片区」自定义分区；楼盘可改名或迁移片区（跟踪标记会跟着搬）。</p>
+      </div>
+      <div class="mod">
+        <h4><span class="dot"></span>成交台账</h4>
+        <p>点 <code>+ 新增成交</code> 记录企业 / 项目 / 面积 / 租金 / 类型；点已有记录可编辑。</p>
+      </div>
+      <div class="mod">
+        <h4><span class="dot"></span>客户管理</h4>
+        <p>点 <code>+ 新增客户</code> 登记拜访（16 字段）；点已有记录可编辑 / 删除。</p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px">
+      <h3>📊 数据透视怎么用</h3>
+      <ol class="steps">
+        <li>切到「数据透视」板块，先看 <strong>总览</strong>：自动汇总各板块的关键指标卡片。</li>
+        <li>点 <strong>自定义透视</strong> 标签页，依次选：<strong>板块</strong>（询盘/成交/楼盘/客户）→ <strong>统计维度</strong>（如按商务区、按行业）→ <strong>指标</strong>（如面积、租金）→ <strong>计算方式</strong>（计数 / 求和 / 平均）。</li>
+        <li>页面自动生成<strong>统计表格 + 条形图</strong>，用来快速看分布和对比。</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h3>📝 贴微信笔记</h3>
+      <p style="font-size:14px;color:var(--ink-2)">
+        在「询盘管理」点开某条客户，找到下方楼盘列表里的 <code>笔记</code> 按钮 → 把微信聊天里复制的盘源 / 跟进文字<strong>粘贴进去</strong> → 保存。保存后按钮变成「笔记✓」，下次打开还能看到。
+      </p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <h2><span class="num">3</span>批量导入（Excel / CSV / 图片 / 粘贴）</h2>
+    <div class="card">
+      <h3>入口</h3>
+      <ul>
+        <li>顶栏 <kbd>导入数据</kbd>：按当前所在板块导入（询盘 / 成交 / 楼盘 / 客户）。</li>
+        <li>各板块自己的 <kbd>导入询盘</kbd> / <kbd>导入台账</kbd> / <kbd>导入楼盘</kbd> / <kbd>导入客户</kbd>。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>三种导入方式</h3>
+      <ul>
+        <li><strong>① 文件</strong>：选 Excel(.xlsx/.xls) 或 CSV。系统自动识别表头，多 sheet 的可选具体工作表。</li>
+        <li><strong>② 粘贴文字</strong>：从表格复制整段（带表头最好），或一行一条流水，例如 <code>企业名-New Setup-550sqm-君超中心32F-145</code>，点「解析」自动抽字段。</li>
+        <li><strong>③ 图片识别</strong>：上传盘源截图 / 拍照，识别文字后再解析（识别不准时可手动改）。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>导入流程</h3>
+      <ol class="steps">
+        <li>选文件 / 粘贴 / 上传图片后，进入<strong>预览表格</strong>。</li>
+        <li>可<strong>逐格修改</strong>、勾选要导入的行、系统会标出重复项。</li>
+        <li>选<strong>重复处理方式</strong>：跳过 / 更新 / 追加。</li>
+        <li>点 <strong>确认导入</strong>，数据写入对应板块。</li>
+      </ol>
+      <div class="note"><strong>建议</strong>：大批量导入前，先点顶栏「导出备份」存一份，万一导错可恢复。</div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <h2><span class="num">4</span>导出与备份</h2>
+    <div class="card">
+      <h3>两种导出</h3>
+      <ul>
+        <li><strong>导出全部</strong>：顶栏 <kbd>导出Excel</kbd> → 生成一个文件，内含「询盘 / 成交 / 客户 / 楼盘」<strong>四个工作表</strong>。</li>
+        <li><strong>单独导出某板块</strong>：切到对应板块，点它的 <kbd>导出询盘Excel</kbd> / <kbd>导出台账Excel</kbd> / <kbd>导出客户Excel</kbd> / <kbd>导出楼盘Excel</kbd>。</li>
+      </ul>
+      <div class="note">导出的是<strong>当前全部数据</strong>（不受页面筛选影响），自动下载到「下载 / 文件」目录。</div>
+    </div>
+    <div class="card">
+      <h3>备份 / 恢复</h3>
+      <ul>
+        <li><kbd>导出备份</kbd>：存一份完整备份文件（推荐定期做）。</li>
+        <li><kbd>恢复备份</kbd>：换设备或误删后，从备份文件把数据导回来。</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>打开导出文件</h3>
+      <ul>
+        <li><strong>WPS</strong>：直接双击，无提示。</li>
+        <li><strong>Microsoft Excel</strong>：若弹「文件格式与扩展名不匹配」，点 <strong>「是」</strong> 即可正常打开，内容完全正常。</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <h2><span class="num">5</span>团队协作（云端同步，配置一次）</h2>
+    <div class="card">
+      <p style="font-size:14.5px;color:var(--ink-2);margin-bottom:12px">
+        <strong>默认每个人数据只存在自己设备上，互相看不到。</strong>想让团队看同一份询盘和台账，做一次同步配置即可——任何人的改动会几秒内同步给所有人。
+      </p>
+      <ol class="steps">
+        <li>点右上角的同步按钮（默认显示 <kbd>本地模式</kbd>）。</li>
+        <li>模式切到 <strong>「云端（Supabase 共享）」</strong>。</li>
+        <li>填入管理员发的三项：<strong>Supabase URL</strong>、<strong>匿名 Key</strong>、<strong>团队空间 Key</strong>。</li>
+        <li>点 <strong>保存</strong>；按钮变成绿色「云端·已同步」即配置完成。</li>
+        <li>点 <strong>生成配置链接</strong> → 复制该链接：<u>收藏给自己</u>（以后免手填），或 <u>发给同事</u>（对方打开即自动进同一云端空间）。</li>
+      </ol>
+      <div class="ok">
+        <strong>只发网址、不发配置链接</strong> = 对方只能打开工具、录自己的数据，<u>看不到你的任何数据</u>。所以工作台链接可以放心转发。
+      </div>
+      <div class="note">
+        <strong>团队空间 Key 相当于团队密码</strong>，所有人必须填<u>完全相同</u>的三项才会进同一个数据空间；不同团队请用不同 Key 隔离，勿发到公开群。
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <h2><span class="num">6</span>把它装成手机 App</h2>
     <div class="card">
       <p style="font-size:14.5px;color:var(--ink-2);margin-bottom:14px">
-        添加到手机主屏幕后，图标和使用体验跟普通 App 一样，全屏打开、没有浏览器地址栏。
+        添加到主屏幕后，图标和使用体验跟普通 App 一样，全屏打开、没有浏览器地址栏，弱网也能看已缓存数据。
       </p>
       <div class="two">
         <div>
@@ -178,7 +307,7 @@ footer{
           <ol class="steps">
             <li>用 <strong>Safari</strong> 打开上面的网址（微信里点开的话，先点右上角「…」→「在 Safari 中打开」）</li>
             <li>点底部中间的 <strong>分享按钮</strong> ⬆️</li>
-            <li>下滑选择 <strong>「添加到主屏幕」</strong> → 右上角「添加」</li>
+            <li>下滑选 <strong>「添加到主屏幕」</strong> → 右上角「添加」</li>
           </ol>
         </div>
         <div>
@@ -186,114 +315,42 @@ footer{
           <ol class="steps">
             <li>用系统浏览器打开网址</li>
             <li>点右上角 <strong>「⋮」菜单</strong></li>
-            <li>选择 <strong>「添加到主屏幕」</strong> 或「安装应用」</li>
+            <li>选 <strong>「添加到主屏幕」</strong> 或「安装应用」</li>
           </ol>
         </div>
       </div>
-      <div class="ok"><strong>装完后</strong>：桌面会出现橙色图标，点开直接进工作台，弱网/没网也能查看已缓存的数据。</div>
     </div>
   </section>
 
-  <!-- 3 -->
+  <!-- 7 -->
   <section>
-    <h2><span class="num">3</span>导出 Excel（重点）</h2>
-
-    <div class="card">
-      <h3>两种导出方式</h3>
-      <ul>
-        <li><strong>导出全部</strong>：页面右上角点 <kbd>导出Excel</kbd> → 生成一个表格文件，里面含「询盘管理 / 成交台账 / 客户管理 / 楼盘库」<strong>四个工作表（sheet）</strong></li>
-        <li><strong>单独导出某个板块</strong>：切到对应板块，在它自己的工具栏点：
-          <br/><kbd>导出询盘Excel</kbd>　<kbd>导出台账Excel</kbd>　<kbd>导出客户Excel</kbd>　<kbd>导出楼盘Excel</kbd>
-        </li>
-      </ul>
-      <div class="note">
-        导出的是<strong>当前全部数据</strong>（不受页面上的筛选条件影响），文件会自动下载到手机/电脑的「下载」目录。
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>各板块导出的字段</h3>
-      <div class="tablewrap" style="box-shadow:none;border:none">
-        <table>
-          <thead><tr><th>板块</th><th>导出列</th></tr></thead>
-          <tbody>
-            <tr><td>询盘管理<br/><span style="font-weight:400;color:var(--ink-3);font-size:12px">14 列</span></td>
-                <td>客户/公司、联系人、行业、面积需求、预算、来源、阶段、片区偏好、期望进场时间、下次跟进、备注、跟进次数、创建日期、更新日期</td></tr>
-            <tr><td>成交台账<br/><span style="font-weight:400;color:var(--ink-3);font-size:12px">9 列</span></td>
-                <td>企业名称、项目、商务区、成交面积、成交类型、成交租金、所属行业、楼层、备注</td></tr>
-            <tr><td>楼盘库<br/><span style="font-weight:400;color:var(--ink-3);font-size:12px">16 列</span></td>
-                <td>片区、楼盘名称、子区域、租金参考、租金底价、免租期、管理费、楼宇等级、装修状况、在租状态、在租面积段、空调、停车、地铁、押金、备注</td></tr>
-            <tr><td>客户管理<br/><span style="font-weight:400;color:var(--ink-3);font-size:12px">16 列</span></td>
-                <td>拜访人、拜访日期、客户公司名、联系人、楼宇、面积、租金（元/月）、管理费（元/月）、到期时间、使用痛点、是否短期3-6个月有搬迁计划、有无转介机会、目标搬迁地段、需求面积、预算范围、备注</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>打开导出文件时的小提示</h3>
-      <ul>
-        <li>用 <strong>WPS</strong> 打开：直接双击即可，无任何提示</li>
-        <li>用 <strong>Microsoft Excel</strong> 打开：会弹一次「文件格式与扩展名不匹配」的提醒，点 <strong>「是」</strong> 就能正常打开，内容完全正常</li>
-        <li>手机上导出后，在「文件 / 下载」里找到，用 WPS 打开即可</li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- 4 -->
-  <section>
-    <h2><span class="num">4</span>团队数据共享（需配置一次）</h2>
-    <div class="card">
-      <p style="font-size:14.5px;color:var(--ink-2);margin-bottom:12px">
-        <strong>默认情况下，每个人的数据只存在自己的设备上，互相看不到。</strong>
-        如果要让团队看到同一份询盘和台账，需要每个人做一次同步配置——填完之后，任何人的改动都会在几秒内同步到所有人。
-      </p>
-      <ol class="steps">
-        <li>打开工作台，点右上角的 <kbd>本地模式</kbd> 按钮（带小圆点那个）</li>
-        <li>模式切换为 <strong>「云端（Supabase 共享）」</strong></li>
-        <li>把管理员发给你的三项内容填进去：<strong>Supabase URL</strong>、<strong>匿名 Key</strong>、<strong>团队空间 Key</strong></li>
-        <li>点 <strong>「测试连接」</strong> → 显示成功后点 <strong>「保存」</strong></li>
-        <li>按钮变成绿色「已同步」即配置完成</li>
-      </ol>
-      <div class="note">
-        <strong>三项配置由管理员统一发放</strong>，团队里所有人必须填<u>完全相同</u>的三项，才会进同一个数据空间。<br/>
-        首次配置后，如果本机已有数据，系统会询问是「用云端覆盖本机」还是「用本机推到云端」，按实际情况选择。
-      </div>
-      <div class="ok">
-        <strong>只发网址不发这三项</strong> = 对方只能打开工具、录自己的数据，<u>看不到你的任何数据</u>。所以链接可以放心转发。
-      </div>
-    </div>
-  </section>
-
-  <!-- 5 -->
-  <section>
-    <h2><span class="num">5</span>常见问题</h2>
+    <h2><span class="num">7</span>常见问题</h2>
     <div class="card">
       <ul>
         <li><strong>打开是旧版 / 看不到新功能？</strong><br/>
-            电脑按 <kbd>Ctrl+Shift+R</kbd>（Mac 是 <kbd>Cmd+Shift+R</kbd>）强制刷新；手机上把 App 关掉重开，或在浏览器里清一下该站点缓存。</li>
+            电脑按 <kbd>Ctrl+Shift+R</kbd>（Mac 是 <kbd>Cmd+Shift+R</kbd>）强制刷新；手机把 App 关掉重开，或在浏览器清一下该站点缓存。</li>
         <li><strong>数据会丢吗？</strong><br/>
-            数据存在本机浏览器里。建议定期点右上角 <kbd>导出备份</kbd> 存一份文件；换设备时用「导入」恢复。配置了云端同步的话则以云端为准。</li>
+            默认存在本机浏览器。建议定期点 <kbd>导出备份</kbd> 存一份；换设备用「恢复备份」找回。配置了云端同步则以云端为准。</li>
         <li><strong>清理浏览器数据会怎样？</strong><br/>
-            会清掉本机数据。所以重要数据请务必先导出备份，或开启云端同步。</li>
+            会清掉本机数据，所以重要数据务必先备份，或开启云端同步。</li>
         <li><strong>可以离线用吗？</strong><br/>
-            可以。装到主屏幕后，没网也能打开查看已缓存的内容；恢复联网后云端同步会自动补齐。</li>
+            可以。装到主屏幕后，没网也能看已缓存内容；联网后云端同步自动补齐。</li>
         <li><strong>网址会变吗？</strong><br/>
-            不会。这是固定的正式网址，后续功能更新会直接生效在同一个地址上，不用重新收藏。</li>
+            不会。固定正式网址，后续功能更新直接生效在同一地址，不用重新收藏。</li>
       </ul>
     </div>
   </section>
 
   <footer>
     松果运营 · 选址顾问工作台<br/>
-    有新需求或使用问题，直接找工作台管理员
+    使用问题或新需求，直接找工作台管理员
   </footer>
 
 </div>
 
 <script>
 document.getElementById("copyBtn").onclick = function(){
-  var url = "https://leona0830zzz-alt.github.io/";
+  var url = "https://pinetree-team.github.io/";
   var btn = this;
   var done = function(){ btn.textContent="已复制 ✓"; setTimeout(function(){ btn.textContent="复制网址"; },1800); };
   if(navigator.clipboard && window.isSecureContext){
