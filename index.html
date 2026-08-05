@@ -359,6 +359,48 @@
     .stat{ padding:13px 14px; }
     .stat .num{ font-size:20px; }
   }
+
+  /* ===== 数据透视 ===== */
+  .pivot-tabs{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+  .pivot-tabs button{ padding:8px 18px; border-radius:999px; border:1px solid var(--line);
+    background:var(--bg); color:var(--ink-2); font-size:14px; cursor:pointer; }
+  .pivot-tabs button.active{ background:var(--orange); color:#fff; border-color:var(--orange); }
+  .kpi-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:14px; }
+  .kpi{ background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 18px; box-shadow:var(--shadow-sm); }
+  .kpi .k-name{ font-size:13px; color:var(--gray-500); margin-bottom:8px; }
+  .kpi .k-num{ font-size:26px; font-weight:700; color:var(--ink); }
+  .kpi .k-sub{ font-size:12px; color:var(--gray-400); margin-top:4px; }
+  .pv-h3{ font-size:15px; color:var(--ink-2); margin:24px 0 12px; font-weight:600; }
+  .pv-cards{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+  .pv-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px 18px; box-shadow:var(--shadow-sm); }
+  .pv-card h4{ font-size:14px; margin:0 0 4px; color:var(--ink); }
+  .pv-card .pv-sub{ font-size:12px; color:var(--gray-400); margin-bottom:10px; }
+  .pv-bar{ display:flex; align-items:center; gap:8px; margin:7px 0; font-size:12px; }
+  .pv-bar .pv-label{ width:84px; flex:none; color:var(--ink-2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pv-bar .pv-track{ flex:1; height:14px; background:var(--gray-100); border-radius:7px; overflow:hidden; }
+  .pv-bar .pv-fill{ height:100%; background:var(--orange); border-radius:7px; }
+  .pv-bar .pv-val{ width:54px; flex:none; text-align:right; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+  .pv-controls{ display:flex; gap:14px; flex-wrap:wrap; margin-bottom:16px; }
+  .pv-controls label{ display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--gray-500); }
+  .pv-controls select{ min-width:150px; }
+  .pv-result{ display:grid; grid-template-columns:minmax(280px,1fr) minmax(280px,1fr); gap:18px; align-items:start; }
+  .pv-table-wrap{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:#fff; }
+  .pv-table-wrap table{ width:100%; border-collapse:collapse; font-size:13px; }
+  .pv-table-wrap th,.pv-table-wrap td{ padding:8px 10px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+  .pv-table-wrap th{ background:var(--gray-100); position:sticky; top:0; }
+  .pv-table-wrap td.num,.pv-table-wrap th.num{ text-align:right; font-variant-numeric:tabular-nums; }
+  .pv-table-wrap tr:last-child td{ border-bottom:none; }
+  .pv-chart{ background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow-sm); }
+  .pv-chart svg{ width:100%; height:auto; display:block; }
+  .pv-chart .pc-title{ font-size:13px; color:var(--ink-2); margin-bottom:10px; font-weight:600; }
+  .pv-chart .pc-empty{ color:var(--gray-400); font-size:13px; padding:20px 0; text-align:center; }
+  @media (max-width:720px){
+    .pv-result{ grid-template-columns:1fr; }
+    .pv-controls label{ flex:1 1 100%; }
+    .pv-controls select{ width:100%; }
+  }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>if(!(window.supabase&&window.supabase.createClient)){document.write('<scr'+'ipt src="https://fastly.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"><\/scr'+'ipt>');}</script>
@@ -380,6 +422,7 @@
       <button data-section="customers">客户管理</button>
       <button data-section="buildings">楼盘库</button>
       <button data-section="maps">地图</button>
+      <button data-section="pivot">数据透视</button>
     </nav>
     <div class="actions">
       <button class="btn-ghost" id="btnSync"><span id="syncDot" class="dot"></span><span id="syncText">本地模式</span></button>
@@ -470,6 +513,38 @@
         </tr></thead>
         <tbody id="custBody"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<div class="section hidden" id="pivotSection">
+  <div class="pivot-tabs" id="pivotTabs">
+    <button data-ptab="overview" class="active">总览</button>
+    <button data-ptab="custom">自定义透视</button>
+  </div>
+
+  <!-- 总览 -->
+  <div id="pvOverview">
+    <div class="kpi-grid" id="pvKpis"></div>
+    <h3 class="pv-h3">各板块关键分布</h3>
+    <div class="pv-cards" id="pvCards"></div>
+  </div>
+
+  <!-- 自定义透视 -->
+  <div id="pvCustom" class="hidden">
+    <div class="pv-controls">
+      <label>板块<select id="pvBoard"></select></label>
+      <label>统计维度<select id="pvDim"></select></label>
+      <label>指标<select id="pvMeasure"></select></label>
+      <label>计算方式<select id="pvAgg">
+        <option value="count">计数(条数)</option>
+        <option value="sum">求和</option>
+        <option value="avg">平均</option>
+      </select></label>
+    </div>
+    <div class="pv-result">
+      <div class="pv-table-wrap" id="pvTableWrap"></div>
+      <div class="pv-chart" id="pvChart"></div>
     </div>
   </div>
 </div>
@@ -2759,11 +2834,13 @@ document.getElementById("mainNav").querySelectorAll("button").forEach(b=>b.oncli
   document.getElementById("buildingSection").classList.toggle("hidden",section!=="buildings");
   document.getElementById("mapSection").classList.toggle("hidden",section!=="maps");
   document.getElementById("customerSection").classList.toggle("hidden",section!=="customers");
+  document.getElementById("pivotSection").classList.toggle("hidden",section!=="pivot");
   document.getElementById("btnAdd").style.display = section==="inquiries"?"inline-block":"none";
   if(section==="deals") renderDeals();
   else if(section==="buildings") renderBuildings();
   else if(section==="maps") renderMaps();
   else if(section==="customers") renderCustomers();
+  else if(section==="pivot") renderPivot();
   else renderAll();
 });
 ["bSearch","bRegion"].forEach(id=>document.getElementById(id).addEventListener("input",renderBuildings));
@@ -2993,6 +3070,180 @@ function deleteCustomer(){
   customers=customers.filter(c=>c.id!==editingCustId);
   saveCustomers(); renderCustomers(); closeCustomer();
 }
+
+/* ================= 数据透视 ================= */
+function buildingRecords(){
+  const out=[]; const ds=DISTRICTS.length?DISTRICTS:Object.keys(ALLBUILDINGS);
+  for(const d of ds){ for(const b of (ALLBUILDINGS[d]||[])){
+    out.push(Object.assign({district:d,name:b.name},b,getBEdits(d,b.name)));
+  } }
+  return out;
+}
+const PIVOT_BOARDS={
+  inquiries:{label:"询盘管理",records:()=>data,
+    dims:[
+      {k:"stage",label:"阶段",vals:STAGES},
+      {k:"industry",label:"行业"},
+      {k:"source",label:"来源"},
+      {k:"regions",label:"片区偏好",multi:true}
+    ],
+    measures:[
+      {k:"area",label:"面积需求(㎡)"},
+      {k:"budget",label:"预算元/㎡/月"},
+      {k:"followups",label:"跟进次数",num:r=>(r.followups||[]).length}
+    ],
+    kpi:r=>({num:r.length,sub:r.filter(x=>x.stage==="成交").length+" 条已成交"})},
+  deals:{label:"成交台账",records:()=>deals,
+    dims:[
+      {k:"district",label:"商务区"},
+      {k:"type",label:"类型"},
+      {k:"industry",label:"行业"},
+      {k:"project",label:"项目"}
+    ],
+    measures:[
+      {k:"area",label:"面积(㎡)"},
+      {k:"rent",label:"租金"}
+    ],
+    kpi:r=>({num:r.length,sub:"覆盖 "+(new Set(r.map(d=>d.district))).size+" 个商务区"})},
+  buildings:{label:"楼盘库",records:()=>buildingRecords(),
+    dims:[
+      {k:"district",label:"片区"},
+      {k:"grade",label:"楼宇等级"},
+      {k:"reno",label:"装修"},
+      {k:"status",label:"状态"},
+      {k:"metro",label:"地铁"}
+    ],
+    measures:[
+      {k:"rent_quote",label:"租金参考"},
+      {k:"mgmt",label:"管理费"}
+    ],
+    kpi:r=>({num:r.length,sub:"覆盖 "+(new Set(r.map(b=>b.district))).size+" 个片区"})},
+  customers:{label:"客户管理",records:()=>customers,
+    dims:[
+      {k:"visitor",label:"拜访人"},
+      {k:"building",label:"楼宇"},
+      {k:"relocate",label:"搬迁计划(3-6月)"},
+      {k:"referral",label:"转介机会"},
+      {k:"targetArea",label:"目标地段"}
+    ],
+    measures:[
+      {k:"area",label:"面积(㎡)"},
+      {k:"rent",label:"租金(元/月)"},
+      {k:"needArea",label:"需求面积(㎡)"},
+      {k:"fee",label:"管理费(元/月)"}
+    ],
+    kpi:r=>({num:r.length,sub:r.filter(c=>c.relocate==="有").length+" 条短期搬迁意向"})}
+};
+function fmtNum(v){ if(v==null||isNaN(v)) return "-"; return (Math.round(v*100)/100).toLocaleString("zh-CN"); }
+function pvNum(r,k,boardKey){
+  const def=(PIVOT_BOARDS[boardKey].measures.find(m=>m.k===k));
+  if(def&&def.num) return Number(def.num(r))||0;
+  const v=Number(r[k]); return isNaN(v)?null:v;
+}
+function pivotAgg(boardKey,dimKey,measureKey,aggType){
+  const board=PIVOT_BOARDS[boardKey]; const recs=board.records();
+  const dimDef=board.dims.find(d=>d.k===dimKey); if(!dimDef) return [];
+  const map=new Map();
+  for(const r of recs){
+    let keys;
+    if(dimDef.multi){ const arr=Array.isArray(r[dimKey])?r[dimKey]:[]; keys=arr.length?arr.map(x=>String(x).trim()):["(未填)"]; }
+    else { const v=String(r[dimKey]==null?"":r[dimKey]).trim(); keys=[v||"(未填)"]; }
+    const mv=measureKey?pvNum(r,measureKey,boardKey):null;
+    for(const key of keys){
+      if(!map.has(key)) map.set(key,{n:0,sum:0,nums:0});
+      const e=map.get(key); e.n++;
+      if(mv!=null&&!isNaN(mv)){ e.sum+=mv; e.nums++; }
+    }
+  }
+  const rows=[];
+  for(const [key,e] of map){
+    let value;
+    if(!measureKey||aggType==="count") value=e.n;
+    else if(aggType==="sum") value=e.sum;
+    else value=e.nums?e.sum/e.nums:0;
+    rows.push({key,count:e.n,sum:e.sum,avg:e.nums?e.sum/e.nums:0,value});
+  }
+  rows.sort((a,b)=>b.value-a.value); return rows;
+}
+let pvTab="overview";
+const pvState={board:"deals",dim:"district",measure:"",agg:"count"};
+function renderPivot(){
+  document.getElementById("pvOverview").classList.toggle("hidden",pvTab!=="overview");
+  document.getElementById("pvCustom").classList.toggle("hidden",pvTab!=="custom");
+  if(pvTab==="overview") renderPivotOverview(); else renderPivotCustom();
+}
+function renderPivotOverview(){
+  const kpis=Object.keys(PIVOT_BOARDS).map(k=>{
+    const b=PIVOT_BOARDS[k]; const kp=b.kpi(b.records());
+    return `<div class="kpi"><div class="k-name">${b.label}</div><div class="k-num">${kp.num}</div><div class="k-sub">${esc(kp.sub)}</div></div>`;
+  }).join("");
+  document.getElementById("pvKpis").innerHTML=kpis;
+  const cards=[
+    {board:"inquiries",dim:"stage",title:"询盘阶段分布",sub:"按跟进阶段"},
+    {board:"deals",dim:"district",title:"成交商务区分布",sub:"按签约商务区"},
+    {board:"customers",dim:"relocate",title:"客户搬迁意向",sub:"短期3-6月计划"},
+    {board:"buildings",dim:"district",title:"楼盘片区分布",sub:"按所属片区"}
+  ];
+  document.getElementById("pvCards").innerHTML=cards.map(c=>{
+    const rows=pivotAgg(c.board,c.dim,null,"count").slice(0,8);
+    const max=rows.length?rows[0].value:1;
+    const bars=rows.map(r=>`<div class="pv-bar"><span class="pv-label" title="${esc(r.key)}">${esc(r.key)}</span><span class="pv-track"><span class="pv-fill" style="width:${max?Math.round(r.value/max*100):0}%"></span></span><span class="pv-val">${r.value}</span></div>`).join("")||`<div class="pv-sub">暂无数据</div>`;
+    return `<div class="pv-card"><h4>${c.title}</h4><div class="pv-sub">${c.sub}</div>${bars}</div>`;
+  }).join("");
+}
+function renderPivotCustom(){
+  const b=document.getElementById("pvBoard"),d=document.getElementById("pvDim"),
+        m=document.getElementById("pvMeasure"),a=document.getElementById("pvAgg");
+  if(!b.options.length) Object.keys(PIVOT_BOARDS).forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=PIVOT_BOARDS[k].label; b.appendChild(o); });
+  if(!PIVOT_BOARDS[pvState.board]) pvState.board=Object.keys(PIVOT_BOARDS)[0];
+  b.value=pvState.board;
+  const board=PIVOT_BOARDS[pvState.board];
+  d.innerHTML=board.dims.map(x=>`<option value="${x.k}">${x.label}</option>`).join("");
+  if(!board.dims.find(x=>x.k===pvState.dim)) pvState.dim=board.dims[0].k;
+  d.value=pvState.dim;
+  m.innerHTML=`<option value="">(仅计数)</option>`+board.measures.map(x=>`<option value="${x.k}">${x.label}</option>`).join("");
+  if(pvState.measure && !board.measures.find(x=>x.k===pvState.measure)) pvState.measure="";
+  m.value=pvState.measure; a.value=pvState.agg;
+  const rows=pivotAgg(pvState.board,pvState.dim,pvState.measure||null,pvState.agg);
+  const dimLabel=board.dims.find(x=>x.k===pvState.dim).label;
+  const aggLabel={count:"计数",sum:"求和",avg:"平均"}[pvState.agg];
+  const valHeader=pvState.measure?(aggLabel+(board.measures.find(x=>x.k===pvState.measure)||{}).label):"计数(条数)";
+  const thead=`<tr><th>${esc(dimLabel)}</th><th class="num">条数</th>${pvState.measure?`<th class="num">合计</th><th class="num">平均</th>`:""}</tr>`;
+  const trows=rows.map(r=>`<tr><td>${esc(r.key)}</td><td class="num">${r.count}</td>${pvState.measure?`<td class="num">${fmtNum(r.sum)}</td><td class="num">${fmtNum(r.avg)}</td>`:""}</tr>`).join("");
+  document.getElementById("pvTableWrap").innerHTML=`<table>${thead}${trows||'<tr><td colspan="4">暂无数据</td></tr>'}</table>`;
+  renderPvChart(rows.slice(0,12),dimLabel,valHeader);
+}
+function renderPvChart(rows,dimLabel,valHeader){
+  const el=document.getElementById("pvChart");
+  if(!rows.length){ el.innerHTML=`<div class="pc-title">${esc(dimLabel)} · ${esc(valHeader)}</div><div class="pc-empty">暂无数据</div>`; return; }
+  const max=Math.max(...rows.map(r=>r.value),1);
+  const rowH=28,padL=112,padR=70,barH=16,top=6,W=520;
+  const H=top+rows.length*rowH;
+  let body="";
+  rows.forEach((r,i)=>{
+    const y=top+i*rowH, bw=Math.max(2,Math.round(r.value/max*(W-padL-padR)));
+    const label=String(r.key), disp=label.length>9?label.slice(0,8)+"…":label;
+    body+=`<text x="0" y="${y+barH/2+4}" font-size="12" fill="#4b4b57">${esc(disp)}</text>`;
+    body+=`<rect x="${padL}" y="${y}" width="${bw}" height="${barH}" rx="4" fill="#FF7A1A"></rect>`;
+    body+=`<text x="${padL+bw+6}" y="${y+barH/2+4}" font-size="12" fill="#4b4b57">${fmtNum(r.value)}</text>`;
+  });
+  el.innerHTML=`<div class="pc-title">${esc(dimLabel)} · ${esc(valHeader)}</div><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMinYMin meet" role="img">${body}</svg>`;
+}
+document.getElementById("pivotTabs").addEventListener("click",e=>{
+  const btn=e.target.closest("[data-ptab]"); if(!btn) return;
+  pvTab=btn.dataset.ptab;
+  document.querySelectorAll("#pivotTabs button").forEach(x=>x.classList.toggle("active",x===btn));
+  renderPivot();
+});
+["pvBoard","pvDim","pvMeasure","pvAgg"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",e=>{
+    if(id==="pvBoard"){ pvState.board=e.target.value; pvState.dim=""; pvState.measure=""; }
+    else if(id==="pvDim") pvState.dim=e.target.value;
+    else if(id==="pvMeasure") pvState.measure=e.target.value;
+    else pvState.agg=e.target.value;
+    renderPivotCustom();
+  });
+});
 
 /* ---------- init ---------- */
 async function boot(){
