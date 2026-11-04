@@ -425,6 +425,11 @@
   .fo-cat-inline{font-size:12px;font-weight:700;padding:4px 24px 4px 12px;border:1px solid #ccd4e0;border-radius:20px;cursor:pointer;max-width:160px;width:100%;-webkit-appearance:none;appearance:none;background-repeat:no-repeat;background-position:right 9px center;background-size:10px 6px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2364748b' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");}
   .fo-cat-inline:focus{outline:none;box-shadow:0 0 0 3px rgba(232,132,60,.25);}
   .data-table td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  /* 市场动态：列多，固定不换行 + 横向滚动，避免加列后挤压 */
+  #dealsTable{min-width:1080px;}
+  #dealsTable td{white-space:nowrap;}
+  #dealsTable td:nth-child(10){white-space:normal;min-width:150px;max-width:260px;}
+  #dealsTable td:nth-child(4){color:var(--gray-700);font-variant-numeric:tabular-nums;}
   .chip.cat-a,.chip.cat-b,.chip.cat-c,.chip.cat-d,.chip.cat-x,.chip.cat-partner,.chip.cat-none,.chip.cat-deal{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:20px;line-height:1.6;white-space:nowrap;}
   .chip.cat-a{background:#d8f3e0;color:#1b7a43;}
   .chip.cat-b{background:#dcecff;color:#2356c7;}
@@ -512,8 +517,18 @@
     <section class="stats" id="dealStats"></section>
     <div class="toolbar">
       <select id="dfDistrict"><option value="">全部商务区</option><option>珠江新城</option><option>琶洲</option><option>金融城</option><option>越秀</option><option>体育中心</option><option>天河商圈</option><option>其他</option></select>
+      <select id="dfYear"><option value="">全部年份</option></select>
       <select id="dfType"><option value="">全部类型</option><option>新设</option><option>搬迁</option><option>扩租</option><option>续租</option></select>
       <select id="dfIndustry"><option value="">全部行业</option></select>
+      <select id="dfArea">
+        <option value="">全部面积</option>
+        <option value="0-300">300㎡以下</option>
+        <option value="300-500">300–500㎡</option>
+        <option value="500-1000">500–1000㎡</option>
+        <option value="1000-2000">1000–2000㎡</option>
+        <option value="2000-">2000㎡以上</option>
+        <option value="none">面积未填</option>
+      </select>
       <input type="text" class="search" id="dfSearch" placeholder="搜索企业 / 项目…" />
       <div class="spacer"></div>
       <button class="btn-ghost" id="btnImpDeal">导入市场动态</button>
@@ -523,7 +538,7 @@
     <div class="table-wrap" id="dealsTableWrap">
       <table class="data-table" id="dealsTable">
         <thead><tr>
-          <th>企业</th><th>项目</th><th>商务区</th><th>面积(㎡)</th><th>类型</th><th>租金</th><th>行业</th><th>楼层</th><th>备注</th><th></th>
+          <th>企业</th><th>项目</th><th>商务区</th><th>年份</th><th>面积(㎡)</th><th>类型</th><th>租金</th><th>行业</th><th>楼层</th><th>备注</th><th></th>
         </tr></thead>
         <tbody id="dealsBody"></tbody>
       </table>
@@ -727,9 +742,10 @@
       <div class="form-row"><label>成交面积(㎡)</label><input type="number" id="d_area" placeholder="如 370" /></div>
       <div class="form-row"><label>租金(元/㎡/月)</label><input type="text" id="d_rent" placeholder="如 180 或 130-140" /></div>
     </div>
-    <div class="grid2">
-      <div class="form-row"><label>行业</label><input type="text" id="d_industry" placeholder="如：教育 / TMT / 金融业" /></div>
-      <div class="form-row"><label>楼层</label><input type="text" id="d_floor" placeholder="如：64F 或 23-24F" /></div>
+    <div class="grid2" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="form-row"><label>行业</label><input type="text" id="d_industry" placeholder="如：教育 / TMT" /></div>
+      <div class="form-row"><label>成交年份</label><input type="number" id="d_year" min="2000" max="2100" step="1" placeholder="如 2026" /></div>
+      <div class="form-row"><label>楼层</label><input type="text" id="d_floor" placeholder="如：64F" /></div>
     </div>
     <div class="form-row"><label>备注</label><input type="text" id="d_note" placeholder="带装修 / 包装修 / 有效租金等" /></div>
     <div class="row end">
@@ -995,7 +1011,7 @@
   <div class="modal">
     <div class="detail-head">
       <div>
-        <h2 id="d_company"></h2>
+        <h2 id="dt_company"></h2>
         <div class="tagline" id="d_tagline"></div>
       </div>
       <button class="btn-ghost btn-sm" id="btnEdit">编辑</button>
@@ -1028,6 +1044,9 @@ const REGIONS = ["珠江新城","琶洲","金融城","创意园","其他"];
 const DEALS_KEY="songguo_deals_v1";
 let deals=[];
 let editingDealId=null;
+const DEAL_YEAR_DEFAULT=new Date().getFullYear();
+/* 老记录没有 year 字段时，统一按当年处理；年份只影响筛选与展示，不改动原始数据 */
+function dealYear(d){ const y=parseInt(d&&d.year,10); return (y>1990&&y<2200)?y:DEAL_YEAR_DEFAULT; }
 function loadDeals(){
   try{ const r=localStorage.getItem(DEALS_KEY); if(r) deals=JSON.parse(r); }
   catch(e){ deals=[]; }
@@ -2354,7 +2373,7 @@ function deleteCurrent(){
 function openDetail(id){
   if(id!==detailId) trackSearch="";
   detailId=id; const x=data.find(d=>d.id===id); if(!x) return;
-  document.getElementById("d_company").textContent=x.company;
+  document.getElementById("dt_company").textContent=x.company;
   document.getElementById("d_tagline").textContent=
     `${x.industry||"—"} · ${x.area?x.area+"㎡":""} · 预算 ${x.budget?x.budget+"元/㎡/月":"待定"} · 来源 ${x.source||"—"} · 阶段 ${x.stage}`;
   const di=dueInfo(x.next);
@@ -2437,7 +2456,7 @@ function xlsDownload(filename,sheets){
   setTimeout(()=>URL.revokeObjectURL(a.href),2000);
 }
 const INQ_HEADERS=["客户/公司","联系人","行业","面积需求㎡","预算元/㎡/月","来源","阶段","片区偏好","期望时间","下次跟进","备注","跟进次数","创建日期","更新日期"];
-const DEAL_HEADERS=["企业","项目","商务区","面积㎡","类型","租金","行业","楼层","备注"];
+const DEAL_HEADERS=["企业","项目","商务区","年份","面积㎡","类型","租金","行业","楼层","备注"];
 const B_HEADERS=["片区","楼盘名称","子区/位置","租金参考","租金底价","免租期","管理费","楼宇等级","装修","状态","面积段","空调","停车","地铁","押金","备注"];
 function inquiryRows(){ return data.map(x=>[
   x.company||"",x.contact||"",x.industry||"",x.area!=null?x.area:"",x.budget!=null?x.budget:"",
@@ -2445,7 +2464,7 @@ function inquiryRows(){ return data.map(x=>[
   (x.followups||[]).length,x.createdAt?iso(x.createdAt):"",x.updatedAt?iso(x.updatedAt):""
 ]); }
 function dealRows(){ return deals.map(d=>[
-  d.company||"",d.project||"",d.district||"",d.area!=null?d.area:"",d.type||"",
+  d.company||"",d.project||"",d.district||"",dealYear(d),d.area!=null?d.area:"",d.type||"",
   d.rent||"",d.industry||"",d.floor||"",d.note||""
 ]); }
 function buildingRows(){
@@ -2494,6 +2513,7 @@ const IMP_DEFS={
     {k:"company",label:"企业",alias:["企业","客户","公司","企业名称","成交企业","客户名称","租户"]},
     {k:"project",label:"项目",alias:["项目","楼盘","大厦","物业","项目名称","楼盘名称","写字楼"]},
     {k:"district",label:"商务区",alias:["商务区","片区","区域","板块","所在片区"]},
+    {k:"year",label:"年份",alias:["年份","成交年份","年","年度","签约年份"]},
     {k:"area",label:"面积㎡",alias:["面积㎡","面积","成交面积","面积(㎡)","建筑面积"]},
     {k:"type",label:"类型",alias:["类型","成交类型","性质","交易类型"]},
     {k:"rent",label:"租金",alias:["租金","成交租金","单价","租金单价","成交单价"]},
@@ -2800,6 +2820,7 @@ function impParseLine(target,line){
     }
     if(target==="buildings"&&!o.district&&(DISTRICTS.indexOf(t)>=0||IMP_REGIONS.indexOf(t)>=0)){ o.district=t; continue; }
     if(target==="deals"&&!o.district&&IMP_REGIONS.indexOf(t)>=0){ o.district=t; continue; }
+    if(target==="deals"&&!o.year){ const ym=/^(20\d{2})\s*年度?$/.exec(t); if(ym){ o.year=ym[1]; continue; } }
     if(target==="inquiries"&&!o.regions&&IMP_REGIONS.indexOf(t)>=0){ o.regions=t; continue; }
     if(target==="inquiries"&&!o.contact&&/^1[3-9]\d{9}$/.test(t)){ o.contact=t; continue; }
     if(target==="inquiries"&&!o.stage&&STAGES.indexOf(t)>=0){ o.stage=t; continue; }
@@ -2991,7 +3012,7 @@ function impDoImport(){
       if(ex&&dm==="update"){ mergeIn(ex,p); updated++; }
       else{ p.id=uid(); deals.push(p); added++; }
     });
-    if(added||updated){ saveDeals(); fillDealIndustry(); renderDeals(); }
+    if(added||updated){ saveDeals(); fillDealIndustry(); fillDealYear(); renderDeals(); }
   }
   else if(t==="buildings"){
     list.forEach(r=>{
@@ -3202,14 +3223,27 @@ document.getElementById("maskDetail").onclick=e=>{ if(e.target.id==="maskDetail"
 
 /* ---------- 市场动态渲染与 CRUD ---------- */
 function renderDeals(){
+  fillDealYear();
   const fd=document.getElementById("dfDistrict").value;
+  const fy=document.getElementById("dfYear").value;
   const ft=document.getElementById("dfType").value;
   const fi=document.getElementById("dfIndustry").value;
+  const fa=document.getElementById("dfArea").value;
   const fs=(document.getElementById("dfSearch").value||"").trim().toLowerCase();
   let list=deals.filter(d=>{
     if(fd&&d.district!==fd) return false;
+    if(fy&&String(dealYear(d))!==fy) return false;
     if(ft&&d.type!==ft) return false;
     if(fi&&d.industry!==fi) return false;
+    if(fa){
+      const a=Number(d.area)||0;
+      if(fa==="none"){ if(a>0) return false; }
+      else {
+        if(a<=0) return false;
+        const parts=fa.split("-"); const lo=Number(parts[0])||0; const hi=parts[1]?Number(parts[1]):Infinity;
+        if(a<lo||a>=hi) return false;
+      }
+    }
     if(fs&&(d.company||"").toLowerCase().indexOf(fs)<0&&(d.project||"").toLowerCase().indexOf(fs)<0) return false;
     return true;
   });
@@ -3228,11 +3262,12 @@ function renderDeals(){
   document.getElementById("dealStats").innerHTML=statHtml;
   // table
   const tb=document.getElementById("dealsBody");
-  if(!list.length){ tb.innerHTML='<tr><td colspan="10" style="text-align:center;color:#888;padding:30px 0">暂无成交数据</td></tr>'; return; }
+  if(!list.length){ tb.innerHTML='<tr><td colspan="11" style="text-align:center;color:#888;padding:30px 0">暂无成交数据</td></tr>'; return; }
   tb.innerHTML=list.map(d=>`<tr>
     <td>${esc(d.company)}</td>
     <td>${esc(d.project)}</td>
     <td><span class="chip">${esc(d.district)}</span></td>
+    <td>${dealYear(d)}</td>
     <td>${(d.area||0).toLocaleString()}</td>
     <td><span class="chip ${d.type==="新设"?"ok":d.type==="续租"?"warn":""}">${esc(d.type)}</span></td>
     <td>${esc(d.rent)}</td>
@@ -3253,6 +3288,7 @@ function openDeal(id){
   document.getElementById("d_area").value=d?d.area:"";
   document.getElementById("d_rent").value=d?d.rent:"";
   document.getElementById("d_industry").value=d?d.industry:"";
+  document.getElementById("d_year").value=d?dealYear(d):DEAL_YEAR_DEFAULT;
   document.getElementById("d_floor").value=d?d.floor:"";
   document.getElementById("d_note").value=d?d.note:"";
   document.getElementById("deal_delete").style.display=d?"inline-block":"none";
@@ -3268,6 +3304,7 @@ function saveDeal(){
     area:parseInt(document.getElementById("d_area").value)||0,
     rent:document.getElementById("d_rent").value.trim(),
     industry:document.getElementById("d_industry").value.trim(),
+    year:parseInt(document.getElementById("d_year").value,10)||DEAL_YEAR_DEFAULT,
     floor:document.getElementById("d_floor").value.trim(),
     note:document.getElementById("d_note").value.trim()
   };
@@ -3277,19 +3314,30 @@ function saveDeal(){
     const idx=deals.findIndex(x=>x.id===editingDealId);
     if(idx>=0){ deals[idx]={...deals[idx],...rec}; }
   } else { rec.id=uid(); deals.unshift(rec); }
-  saveDeals(); renderDeals(); fillDealIndustry(); closeDeal();
+  saveDeals(); renderDeals(); fillDealIndustry(); fillDealYear(); closeDeal();
 }
 function deleteDeal(){
   if(!editingDealId) return;
   if(!confirm("确定删除这条成交记录？")) return;
   deals=deals.filter(d=>d.id!==editingDealId);
-  saveDeals(); renderDeals(); fillDealIndustry(); closeDeal();
+  saveDeals(); renderDeals(); fillDealIndustry(); fillDealYear(); closeDeal();
 }
 function fillDealIndustry(){
   const sel=document.getElementById("dfIndustry");
   const cur=sel.value;
   const inds=[...new Set(deals.map(d=>d.industry).filter(Boolean))].sort();
   sel.innerHTML=`<option value="">全部行业</option>`+inds.map(i=>`<option${i===cur?" selected":""}>${esc(i)}</option>`).join("");
+}
+let _yearSig=null;
+function fillDealYear(force){
+  const sel=document.getElementById("dfYear"); if(!sel) return;
+  const ys=[...new Set(deals.map(dealYear))].sort((a,b)=>b-a);
+  const sig=ys.join(",");
+  const cur=sel.value;
+  if(!force&&sig===_yearSig){ if(cur&&ys.indexOf(Number(cur))<0) sel.value=""; return; }
+  _yearSig=sig;
+  sel.innerHTML=`<option value="">全部年份</option>`+ys.map(y=>`<option value="${y}"${String(y)===cur?" selected":""}>${y} 年</option>`).join("");
+  if(cur&&ys.indexOf(Number(cur))<0) sel.value="";
 }
 
 /* ---------- 客户管理（客户拜访登记）渲染与 CRUD ---------- */
@@ -3747,12 +3795,12 @@ async function boot(){
   initAllBuildings();
   fillSelectors(); renderRegionOptions(); fillDistrictFilters();
   renderAll(); renderBuildings(); renderMaps();
-  fillDealIndustry();
+  fillDealIndustry(); fillDealYear();
   const fd=document.getElementById("fu_date"); if(fd) fd.value=iso(Date.now());
   _booting=false;
   // 云端数据拉取完成后再补增量记录，确保新增能推回云端且不与远端重复
   const _nPatch=applyDealPatches(), _nUpd=applyDealUpdates();
-  if(_nPatch+_nUpd>0){ renderDeals(); fillDealIndustry(); }
+  if(_nPatch+_nUpd>0){ renderDeals(); fillDealIndustry(); fillDealYear(); }
   if(custSeeded && syncCfg.mode==="cloud" && cfgComplete() && sbClient()) scheduleSync();
   if(syncCfg.mode==="cloud" && cfgComplete() && sbClient()) subscribeRemote();
   ensureFollowupSeed();
@@ -3772,7 +3820,7 @@ document.getElementById("deal_close").onclick=closeDeal;
 document.getElementById("maskDeal").onclick=e=>{ if(e.target.id==="maskDeal") closeDeal(); };
 document.getElementById("deal_save").onclick=saveDeal;
 document.getElementById("deal_delete").onclick=deleteDeal;
-["dfDistrict","dfType","dfIndustry","dfSearch"].forEach(id=>document.getElementById(id).addEventListener("input",renderDeals));
+["dfDistrict","dfYear","dfType","dfIndustry","dfArea","dfSearch"].forEach(id=>document.getElementById(id).addEventListener("input",renderDeals));
 boot();
 document.getElementById("fu_date").value=iso(Date.now());
 
